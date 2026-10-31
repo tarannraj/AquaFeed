@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AquaFeed</title>
+    <link rel="icon" type="image/png" href="assets/img/logo.jpeg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule=""
+      src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.js"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+  </head>
+
+  <body translate="no">
+    <div class="app-container">
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">
+            <ion-icon name="water"></ion-icon>
+          </div>
+          <h1 class="logo-text">Aqua<span>Feed</span></h1>
+        </div>
+        <div class="header-actions">
+          <button
+            class="theme-toggle"
+            id="header-theme-toggle"
+            onclick="toggleTheme()"
+            title="Toggle Theme"
+          >
+            <ion-icon name="moon-outline" class="theme-icon-el"></ion-icon>
+          </button>
+          <div class="status-badge">
+            <span class="dot"></span>
+            Checking...
+          </div>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <div class="left-col">
+          <!-- Food Control Section -->
+          <div id="foodControl" class="content-section">
+            <div class="card feeding-control-card">
+              <h2>Feeding Control</h2>
+
+              <div
+                class="control-grid"
+                style="display: flex; flex-direction: column; gap: 2rem"
+              >
+                <!-- Food Selection (Read Only) -->
+                <div
+                  class="selection-row"
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                  "
+                >
+                  <div class="input-group">
+                    <label>Food Type</label>
+                    <div class="time-input-wrapper readonly">
+                      <input
+                        type="text"
+                        id="foodTypeDisplay"
+                        class="time-input"
+                        readonly
+                        value="Pellets"
+                        style="cursor: default"
+                      />
+                      <input type="hidden" id="foodType" value="pellets" />
+                    </div>
+                  </div>
+
+                  <div class="input-group">
+                    <label>Size</label>
+                    <div class="time-input-wrapper readonly">
+                      <input
+                        type="text"
+                        id="foodSizeDisplay"
+                        class="time-input"
+                        readonly
+                        value="micro"
+                        style="cursor: default"
+                      />
+                      <input type="hidden" id="foodSize" value="micro" />
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="dispense-section"
+                  style="
+                    padding: 1.5rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: 1.5rem;
+                    background: rgba(0, 0, 0, 0.01);
+                  "
+                >
+                  <div class="input-group" style="margin-bottom: 1.5rem">
+                    <label>Amount (grams)</label>
+                    <input
+                      type="number"
+                      id="foodGrams"
+                      class="time-input"
+                      value="1"
+                      min="0.1"
+                      max="20"
+                      step="0.1"
+                    />
+                  </div>
+                  <div class="feed-action" style="padding-top: 0">
+                    <button class="btn-feed" onclick="feednow()">
+                      <div class="feed-content">
+                        <ion-icon name="flash" class="feed-icon"></ion-icon>
+                        <span>Feed Now</span>
+                      </div>
+                    </button>
+                    <p class="status-text">Awaiting Command...</p>
+                  </div>
+                </div>
+
+                <!-- Scheduling UI -->
+                <div
+                  class="scheduling-section"
+                  style="
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--border-color);
+                  "
+                >
+                  <div class="input-group" style="margin-bottom: 1.2rem">
+                    <label>Set Schedule Time</label>
+                    <div
+                      class="schedule-action-row"
+                      style="display: flex; gap: 1rem; align-items: stretch"
+                    >
+                      <div
+                        class="time-input-wrapper"
+                        onclick="openTimeModal()"
+                        style="flex: 0 0 5.5rem"
+                      >
+                        <div
+                          class="time-input"
+                          style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100%;
+                            padding: 0;
+                          "
+                        >
+                          <span
+                            class="material-icons"
+                            style="
+                              font-size: 2.2rem;
+                              color: var(--primary-blue);
+                            "
+                            >schedule</span
+                          >
+                        </div>
+                      </div>
+                      <button
+                        class="btn-add-schedule"
+                        onclick="openTimeModal()"
+                        style="
+                          flex: 1;
+                          margin: 0;
+                          height: 5.5rem;
+                          border-radius: 1.2rem;
+                          font-size: 1.4rem;
+                        "
+                      >
+                        Add New Schedule
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="active-routines">
+                    <h3>Active Routines</h3>
+                    <div id="wrapper" class="routines-list">
+                      <!-- Routines populate here from Firebase -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Food Config Section -->
+          <div id="foodConfig" class="content-section">
+            <div class="card config-card">
+              <h2>Food Configuration</h2>
+              <div
+                class="config-content"
+                style="display: flex; flex-direction: column; gap: 1.5rem"
+              >
+                <!-- Food Selection (Editable) -->
+                <div
+                  class="selection-row"
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                  "
+                >
+                  <div class="input-group">
+                    <label>Food Type</label>
+                    <div
+                      class="time-input-wrapper"
+                      onclick="openFoodTypeModal()"
+                    >
+                      <input
+                        type="text"
+                        id="foodTypeDisplayConfig"
+                        class="time-input"
+                        readonly
+                        value="Pellets"
+                        style="cursor: pointer"
+                      />
+                      <span class="material-icons dropdown-icon">edit</span>
+                    </div>
+                  </div>
+
+                  <div class="input-group">
+                    <label>Size</label>
+                    <div
+                      class="time-input-wrapper"
+                      onclick="openFoodSizeModal()"
+                    >
+                      <input
+                        type="text"
+                        id="foodSizeDisplayConfig"
+                        class="time-input"
+                        readonly
+                        value="micro"
+                        style="cursor: pointer"
+                      />
+                      <span class="material-icons dropdown-icon">edit</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flow-rate-display">
+                  <span
+                    style="
+                      display: block;
+                      font-size: 1.1rem;
+                      color: var(--text-muted);
+                      font-weight: 600;
+                      margin-bottom: 0.5rem;
+                      text-transform: uppercase;
+                    "
+                    >Current Flow Rate</span
+                  >
+                  <span
+                    id="flowRateValue"
+                    style="
+                      font-size: 3rem;
+                      font-weight: 800;
+                      color: var(--primary-blue-dark);
+                    "
+                    >0.00</span
+                  >
+                  <span
+                    style="
+                      font-size: 1.2rem;
+                      color: var(--text-light);
+                      font-weight: 600;
+                      margin-left: 0.5rem;
+                    "
+                    >g/sec</span
+                  >
+                </div>
+
+                <div class="calibration-section" style="margin-top: 1rem">
+                  <button
+                    class="btn-add-schedule"
+                    id="btn-calibrate"
+                    onclick="calibrateFeeder()"
+                    style="width: 100%; height: 5rem; font-weight: 700"
+                  >
+                    Calibrate Feeder
+                  </button>
+                  <div
+                    class="calibration-footer"
+                    style="
+                      display: grid;
+                      place-items: center;
+                      margin-top: 1.2rem;
+                      min-height: 3.5rem;
+                    "
+                  >
+                    <p
+                      id="calibration-instruction"
+                      style="
+                        grid-area: 1/1;
+                        text-align: center;
+                        margin: 0;
+                        line-height: 1.4;
+                      "
+                    >
+                      Run this after refilling feeder to ensure accurate
+                      dispensing
+                    </p>
+                    <p
+                      id="calibration-status"
+                      class="status-text"
+                      style="
+                        grid-area: 1/1;
+                        display: none;
+                        margin: 0;
+                        text-align: center;
+                      "
+                    ></p>
+                  </div>
+                </div>
+
+                <!-- Mobile Theme Toggle (Inside Config) -->
+                <div
+                  class="mobile-theme-selection"
+                  id="mobile-theme-toggle"
+                  style="
+                    display: none;
+                    border-top: 1px solid var(--border-color);
+                    padding-top: 1.5rem;
+                    margin-top: 1rem;
+                  "
+                >
+                  <div class="input-group">
+                    <label>App Appearance</label>
+                    <div
+                      class="theme-switch-card"
+                      onclick="toggleTheme()"
+                      style="
+                        background: var(--input-bg);
+                        border: 1px solid var(--border-color);
+                        padding: 1.5rem;
+                        border-radius: 1.2rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        cursor: pointer;
+                      "
+                    >
+                      <div
+                        style="display: flex; align-items: center; gap: 1rem"
+                      >
+                        <ion-icon
+                          name="moon-outline"
+                          class="theme-icon-el"
+                          style="font-size: 2rem; color: var(--primary-blue)"
+                        ></ion-icon>
+                        <span
+                          style="
+                            font-size: 1.4rem;
+                            font-weight: 600;
+                            color: var(--text-dark);
+                          "
+                          >Dark Mode</span
+                        >
+                      </div>
+                      <div
+                        class="switch-toggle-box"
+                        style="
+                          width: 4rem;
+                          height: 2.2rem;
+                          background: var(--text-light);
+                          border-radius: 1.1rem;
+                          position: relative;
+                          transition: all 0.3s;
+                        "
+                      >
+                        <div
+                          class="switch-dot"
+                          style="
+                            width: 1.6rem;
+                            height: 1.6rem;
+                            background: white;
+                            border-radius: 50%;
+                            position: absolute;
+                            top: 0.3rem;
+                            left: 0.3rem;
+                            transition: all 0.3s;
+                          "
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <!-- Recent Activity Section -->
+          <div id="activity" class="content-section">
+            <div class="card activity-card">
+              <h2>Recent Activity</h2>
+              <div id="activity-list" class="activity-list">
+                <!-- Activity items populate here from Firebase -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav" id="bottomNav">
+      <div class="nav-item active" onclick="showSection('foodControl')">
+        <ion-icon name="restaurant"></ion-icon>
+        <span>Feed</span>
+      </div>
+      <div class="nav-item" onclick="showSection('foodConfig')">
+        <ion-icon name="options"></ion-icon>
+        <span>Config</span>
+      </div>
+      <div class="nav-item" onclick="showSection('activity')">
+        <ion-icon name="list"></ion-icon>
+        <span>Logs</span>
+      </div>
+    </nav>
+
+    <!-- Custom Time Modal -->
+    <div id="timeModal" class="modal-backdrop">
+      <div class="modal-card">
+        <h3>Select Time</h3>
+        <div class="time-picker-custom">
+          <input
+            type="number"
+            id="hr-input"
+            class="time-display"
+            value="12"
+            min="1"
+            max="12"
+          />
+          <div class="time-colon">:</div>
+          <input
+            type="number"
+            id="min-input"
+            class="time-display"
+            value="00"
+            min="0"
+            max="59"
+          />
+          <button id="ampm-toggle" class="ampm-toggle" onclick="toggleAmPm()">
+            PM
+          </button>
+        </div>
+        <p
+          id="schedule-error"
+          style="
+            color: #ef4444;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            display: none;
+          "
+        >
+          Max 3 schedules allowed
+        </p>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeTimeModal()">Cancel</button>
+          <button class="btn-confirm" onclick="addTime()">Set Time</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Food Type Modal -->
+    <div id="food-type-modal" class="modal-backdrop">
+      <div class="modal-card">
+        <h3>Select Food Type</h3>
+        <div class="food-options-container" id="foodTypeOptions">
+          <button
+            class="food-option-btn active"
+            onclick="selectModalFoodType('pellets')"
+          >
+            Pellets
+          </button>
+          <button
+            class="food-option-btn"
+            onclick="selectModalFoodType('granules')"
+          >
+            Granules
+          </button>
+        </div>
+        <div class="modal-actions" style="margin-top: 2rem">
+          <button class="btn-cancel" onclick="closeFoodTypeModal()">
+            Cancel
+          </button>
+          <button class="btn-confirm" onclick="confirmFoodType()">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Food Size Modal -->
+    <div id="food-size-modal" class="modal-backdrop">
+      <div class="modal-card">
+        <h3>Select Size</h3>
+        <div class="food-options-container" id="foodSizeOptions">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="modal-actions" style="margin-top: 2rem">
+          <button class="btn-cancel" onclick="closeFoodSizeModal()">
+            Cancel
+          </button>
+          <button class="btn-confirm" onclick="confirmFoodSize()">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script id="rendered-js" src="assets/js/script_v2.js"></script>
+  </body>
+</html>

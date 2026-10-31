@@ -1,0 +1,11 @@
+# Secrets and local-only files
+code2.0/secrets.h
+**/secrets.h
+.env
+.env.*
+!.env.example
+**/.firebase/
+WEB/.firebaserc
+WEB/firebase-tools-instant-win.exe
+ESM_Project_Report_Final.pdf
+*.log
